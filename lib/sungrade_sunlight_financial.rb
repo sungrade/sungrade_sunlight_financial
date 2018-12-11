@@ -9,7 +9,7 @@ require "base64"
 
 module SungradeSunlightFinancial
   class << self
-    def access_token(settings: SungradeSunlightFinancial::Settings.new)
+    def access_token(settings: new_settings)
       requester = SungradeSunlightFinancial::Request.new(
         settings: settings,
         requires_access_token: false
@@ -23,6 +23,27 @@ module SungradeSunlightFinancial
       end
       raise UnsuccessfulRequest.new(response: response) unless response.success?
       JSON.parse(response.body).fetch("access_token") { nil }
+    end
+
+    def calculate(settings: new_settings, term:, apr:, loan_amount:)
+      requester = SungradeSunlightFinancial::Request.new(
+        settings: settings,
+        requires_access_token: false
+      )
+      response = requester.post do |req|
+        req.url("ws/rest/v2/pt/slf/calculator")
+        req.body = {
+          term: term,
+          apr: apr,
+          loanAmount: loan_amount
+        }.to_json
+      end
+      raise UnsuccessfulRequest.new(response: response) unless response.success?
+      response
+    end
+
+    def new_settings
+      SungradeSunlightFinancial::Settings.new
     end
 
     def configure

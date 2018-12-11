@@ -3,6 +3,14 @@ module SungradeSunlightFinancial
     attr_writer *Configuration::FIELDS
     attr_writer :access_token
 
+    def initialize(opts = {})
+      opts.each do |meth, val|
+        if respond_to?("#{meth}=")
+          self.send("#{meth}=", val)
+        end
+      end
+    end
+
     def base_url
       with_required(__method__) do
         @base_url || Configuration.instance.base_url
